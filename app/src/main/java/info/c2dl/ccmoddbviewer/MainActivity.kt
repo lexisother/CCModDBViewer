@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,16 +51,30 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-
-                    LazyColumn(
-                        modifier = Modifier.padding(0.dp, 10.dp, 0.dp, 0.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        result?.let { result ->
-                            result.mods?.let { mods ->
-                                items(mods.map { it.value }) { meta ->
-                                    ModListItem(modName = "${meta.name}", modDescription = "${meta.description}") {
-                                        Text("${meta.description}")
+                    if (result == null) {
+                        Column(
+                            modifier = Modifier.wrapContentHeight().fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.wrapContentSize().align(Alignment.CenterHorizontally)
+                            )
+                            Text(modifier = Modifier.align(Alignment.CenterHorizontally), text = "Loading...")
+                        }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.padding(0.dp, 10.dp, 0.dp, 0.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            result?.let { result ->
+                                result.mods?.let { mods ->
+                                    items(mods.map { it.value }) { meta ->
+                                        ModListItem(
+                                            modName = "${meta.name}",
+                                            modDescription = "${meta.description}"
+                                        ) {
+                                            Text("${meta.description}")
+                                        }
                                     }
                                 }
                             }
