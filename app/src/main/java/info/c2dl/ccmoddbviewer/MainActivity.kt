@@ -5,19 +5,22 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.beust.klaxon.Klaxon
 
 import info.c2dl.ccmoddbviewer.ui.theme.CCModDBViewerTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -34,10 +37,31 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    Row {
-                        Column {
-                            ModListItem(modName = "Test", modDescription = "Test2") {
-                                Text("Hi")
+                    // coroutine is basically the same as Thread in Java
+                    val coroutineScope = rememberCoroutineScope()
+                    // making the result a mutable so the screen updates with mod list after fetching is done
+                    var result by remember { mutableStateOf<ModDB?>(null) }
+                    // coroutine scope because doing networking on main thread is bad
+                    coroutineScope.launch(Dispatchers.IO) {
+                        val request = req("https://raw.githubusercontent.com/CCDirectLink/CCModDB/master/mods.json")?.body()?.string()
+                        println(request)
+                        if (request != null) {
+                            result = Klaxon().parse<ModDB>(request)
+                        }
+                    }
+
+
+                    LazyColumn(
+                        modifier = Modifier.padding(0.dp, 10.dp, 0.dp, 0.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        result?.let { result ->
+                            result.mods?.let { mods ->
+                                items(mods.map { it.value }) { meta ->
+                                    ModListItem(modName = "${meta.name}", modDescription = "${meta.description}") {
+                                        Text("${meta.description}")
+                                    }
+                                }
                             }
                         }
                     }
