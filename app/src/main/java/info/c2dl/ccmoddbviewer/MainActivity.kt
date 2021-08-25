@@ -18,9 +18,14 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 
 import info.c2dl.ccmoddbviewer.ui.theme.CCModDBViewerTheme
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 
 
 class MainActivity : ComponentActivity() {
+    private val client = OkHttpClient()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -39,6 +44,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun req(url: String): Response? {
+        val request = Request.Builder().url(url).build()
+        return client.newCall(request).execute()
     }
 
     /**
