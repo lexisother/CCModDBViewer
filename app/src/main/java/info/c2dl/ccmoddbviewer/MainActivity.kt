@@ -15,6 +15,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.beust.klaxon.Klaxon
@@ -37,7 +38,8 @@ class MainActivity : ComponentActivity() {
             CCModDBViewerTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
+                    color = MaterialTheme.colors.background,
+                    shape = MaterialTheme.shapes.medium
                 ) {
                     // coroutine is basically the same as Thread in Java
                     val coroutineScope = rememberCoroutineScope()
@@ -68,18 +70,13 @@ class MainActivity : ComponentActivity() {
                         }
                     } else {
                         LazyColumn(
-                            modifier = Modifier.padding(0.dp, 10.dp, 0.dp, 0.dp),
+                            modifier = Modifier.padding(10.dp),
                             verticalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             result?.let { result ->
                                 result.mods?.let { mods ->
-                                    items(mods.map { it.value }) { meta ->
-                                        ModListItem(
-                                            modName = "${meta.name}",
-                                            modDescription = "${meta.description}"
-                                        ) {
-                                            Text("${meta.description}")
-                                        }
+                                    items(mods.map { it.value }) { mod ->
+                                        ModListItem(mod)
                                     }
                                 }
                             }
@@ -101,34 +98,56 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     fun ModListItem(
-        modName: String,
-        modDescription: String,
-        content: @Composable () ->  Unit
+        mod: Mod
     ) {
         var isDialogVisible by remember { mutableStateOf(false) }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { isDialogVisible = true }
+
+        Card(
+            modifier = Modifier.fillMaxWidth().clickable { isDialogVisible = true },
+            elevation = 10.dp
         ) {
-                Card(
-                    modifier = Modifier.fillMaxWidth().clickable {  },
-                    elevation = 10.dp
-                ) {
-                    Column(
-                        modifier = Modifier.padding(15.dp)
-                    ) {
-                        Text(text = modName)
-                        Text(text = modDescription)
-                    }
-                }
+            Column(
+                modifier = Modifier.padding(15.dp)
+            ) {
+                Text(mod.name!!)
+                Text(mod.description!!)
+            }
         }
 
         if (isDialogVisible) {
             Dialog(
                 onDismissRequest = { isDialogVisible = false },
                 properties = DialogProperties(usePlatformDefaultWidth = false),
-                content = content
+                content = {
+                    Card(
+                        modifier = Modifier.padding(30.dp).background(Color(0x2d2d2d))
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(10.dp),
+                            verticalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            Text(
+                                fontSize = 30.sp,
+                                text = mod.name!!
+                            )
+                            Text(mod.description!!)
+
+                            Button(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = {}
+                            ) {
+                                Text("Homepage")
+                            }
+                            Button(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = {}
+                            ) {
+                                Text("License")
+                            }
+
+                        }
+                    }
+                }
             )
         }
     }
