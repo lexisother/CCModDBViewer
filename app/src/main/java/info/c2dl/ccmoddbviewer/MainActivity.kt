@@ -20,6 +20,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.beust.klaxon.Klaxon
 
 import info.c2dl.ccmoddbviewer.ui.theme.CCModDBViewerTheme
+import info.c2dl.ccmoddbviewer.ui.theme.Purple200
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
@@ -53,11 +54,15 @@ class MainActivity : ComponentActivity() {
 
                     if (result == null) {
                         Column(
-                            modifier = Modifier.wrapContentHeight().fillMaxWidth(),
+                            modifier = Modifier
+                                .wrapContentHeight()
+                                .fillMaxWidth(),
                             verticalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             CircularProgressIndicator(
-                                modifier = Modifier.wrapContentSize().align(Alignment.CenterHorizontally)
+                                modifier = Modifier
+                                    .wrapContentSize()
+                                    .align(Alignment.CenterHorizontally)
                             )
                             Text(modifier = Modifier.align(Alignment.CenterHorizontally), text = "Loading...")
                         }
@@ -105,12 +110,18 @@ class MainActivity : ComponentActivity() {
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { isDialogVisible = true }
-                .background(Color(525252))
         ) {
-            Column {
-                Text(text = modName)
-                Text(text = modDescription)
-            }
+                Card(
+                    modifier = Modifier.fillMaxWidth().clickable {  },
+                    elevation = 10.dp
+                ) {
+                    Column(
+                        modifier = Modifier.padding(15.dp)
+                    ) {
+                        Text(text = modName)
+                        Text(text = modDescription)
+                    }
+                }
         }
 
         if (isDialogVisible) {
