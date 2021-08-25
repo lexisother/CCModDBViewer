@@ -29,8 +29,12 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    ModListItem(modName = "Test", modDescription = "Test2") {
-                        Text("Hi")
+                    Row {
+                        Column {
+                            ModListItem(modName = "Test", modDescription = "Test2") {
+                                Text("Hi")
+                            }
+                        }
                     }
                 }
             }
