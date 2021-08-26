@@ -1,5 +1,7 @@
 package info.c2dl.ccmoddbviewer
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -92,6 +95,19 @@ class MainActivity : ComponentActivity() {
         return client.newCall(request).execute()
     }
 
+    @Composable
+    fun ExternalButton(dest: String, text: String) {
+        val context = LocalContext.current
+        val intent = remember { Intent(Intent.ACTION_VIEW, Uri.parse(dest)) }
+
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { context.startActivity(intent) }
+        ) {
+            Text(text)
+        }
+    }
+
     /**
      * @author X1nto
      */
@@ -132,19 +148,13 @@ class MainActivity : ComponentActivity() {
                             )
                             Text(mod.description!!)
 
-                            Button(
-                                modifier = Modifier.fillMaxWidth(),
-                                onClick = {}
-                            ) {
-                                Text("Homepage")
+                            if (mod.page.isNotEmpty()) {
+                                mod.page.let { pages ->
+                                    pages.map {
+                                        ExternalButton(it.url!!, it.name!!)
+                                    }
+                                }
                             }
-                            Button(
-                                modifier = Modifier.fillMaxWidth(),
-                                onClick = {}
-                            ) {
-                                Text("License")
-                            }
-
                         }
                     }
                 }
