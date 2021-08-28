@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Klaxon
 
 import info.c2dl.ccmoddbviewer.ui.theme.CCModDBViewerTheme
@@ -50,10 +51,14 @@ class MainActivity : ComponentActivity() {
                     var result by remember { mutableStateOf<ModDB?>(null) }
                     // coroutine scope because doing networking on main thread is bad
                     coroutineScope.launch(Dispatchers.IO) {
-                        val request = req("https://raw.githubusercontent.com/CCDirectLink/CCModDB/master/mods.json")?.body()?.string()
+                        val request = req("https://raw.githubusercontent.com/CCDirectLink/CCModDB/master/npDatabase.json")?.body()?.string()
                         println(request)
                         if (request != null) {
-                            result = Klaxon().parse<ModDB>(request)
+                            result = with(Klaxon()) {
+                                return@with parse<Map<String, JsonObject>>(request)?.mapValues {
+                                    parseFromJsonObject<Mod>(it.value)!!
+                                }
+                            }
                         }
                     }
 
@@ -76,11 +81,9 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier.padding(10.dp),
                             verticalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            result?.let { result ->
-                                result.mods?.let { mods ->
-                                    items(mods.map { it.value }) { mod ->
-                                        ModListItem(mod)
-                                    }
+                            result?.let { mods ->
+                                items(mods.map { it.value }) { mod ->
+                                    ModListItem(mod)
                                 }
                             }
                         }
@@ -117,6 +120,7 @@ class MainActivity : ComponentActivity() {
         mod: Mod
     ) {
         var isDialogVisible by remember { mutableStateOf(false) }
+        val meta = mod.metadata
 
         Card(
             modifier = Modifier.fillMaxWidth().clickable { isDialogVisible = true },
@@ -125,8 +129,8 @@ class MainActivity : ComponentActivity() {
             Column(
                 modifier = Modifier.padding(15.dp)
             ) {
-                Text(mod.name!!)
-                Text(mod.description!!)
+                Text(meta.name)
+                Text(meta.description ?: "")
             }
         }
 
@@ -144,16 +148,12 @@ class MainActivity : ComponentActivity() {
                         ) {
                             Text(
                                 fontSize = 30.sp,
-                                text = mod.name!!
+                                text = meta.name
                             )
-                            Text(mod.description!!)
+                            Text(meta.description ?: "")
 
-                            if (mod.page.isNotEmpty()) {
-                                mod.page.let { pages ->
-                                    pages.map {
-                                        ExternalButton(it.url!!, it.name!!)
-                                    }
-                                }
+                            if (meta.homepage != null) {
+                                ExternalButton("Homepage", meta.homepage)
                             }
                         }
                     }
